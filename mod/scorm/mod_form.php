@@ -388,6 +388,8 @@ class mod_scorm_mod_form extends moodleform_mod {
                             $errors['packagefile'] = get_string('repositorynotsupported', 'mod_scorm');
                         }
                     }
+                } else if(strtolower($file->get_filename()) == 'tincan.xml') {
+                    // do nothing
                 } else if (strtolower(substr($file->get_filename(), -3)) == 'xml') {
                     $errors['packagefile'] = get_string('invalidmanifestname', 'mod_scorm');
                 } else {
