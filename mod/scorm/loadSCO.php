@@ -108,35 +108,40 @@ if ($sco->scormtype == 'asset') {
 
 // Forge SCO URL.
 $connector = '';
-$version = substr($scorm->version, 0, 4);
-if ((isset($sco->parameters) && (!empty($sco->parameters))) || ($version == 'AICC')) {
-    if (stripos($sco->launch, '?') !== false) {
-        $connector = '&';
-    } else {
-        $connector = '?';
-    }
-    if ((isset($sco->parameters) && (!empty($sco->parameters))) && ($sco->parameters[0] == '?')) {
-        $sco->parameters = substr($sco->parameters, 1);
-    }
-}
-
-if ($version == 'AICC') {
-    require_once("$CFG->dirroot/mod/scorm/datamodels/aicclib.php");
-    $aiccsid = scorm_aicc_get_hacp_session($scorm->id);
-    if (empty($aiccsid)) {
-        $aiccsid = sesskey();
-    }
-    $scoparams = '';
-    if (isset($sco->parameters) && (!empty($sco->parameters))) {
-        $scoparams = '&'. $sco->parameters;
-    }
-    $launcher = $sco->launch.$connector.'aicc_sid='.$aiccsid.'&aicc_url='.$CFG->wwwroot.'/mod/scorm/aicc.php'.$scoparams;
+if(scorm_version_check($scorm->version, SCORM_TCAPI)) {
+  require_once($CFG->dirroot . '/mod/scorm/datamodels/tincanlib.php');
+  $launcher = $sco->launch;
 } else {
-    if (isset($sco->parameters) && (!empty($sco->parameters))) {
-        $launcher = $sco->launch.$connector.$sco->parameters;
-    } else {
-        $launcher = $sco->launch;
-    }
+  $version = substr($scorm->version, 0, 4);
+  if ((isset($sco->parameters) && (!empty($sco->parameters))) || ($version == 'AICC')) {
+      if (stripos($sco->launch, '?') !== false) {
+          $connector = '&';
+      } else {
+          $connector = '?';
+      }
+      if ((isset($sco->parameters) && (!empty($sco->parameters))) && ($sco->parameters[0] == '?')) {
+          $sco->parameters = substr($sco->parameters, 1);
+      }
+  }
+
+  if ($version == 'AICC') {
+      require_once("$CFG->dirroot/mod/scorm/datamodels/aicclib.php");
+      $aiccsid = scorm_aicc_get_hacp_session($scorm->id);
+      if (empty($aiccsid)) {
+          $aiccsid = sesskey();
+      }
+      $scoparams = '';
+      if (isset($sco->parameters) && (!empty($sco->parameters))) {
+          $scoparams = '&'. $sco->parameters;
+      }
+      $launcher = $sco->launch.$connector.'aicc_sid='.$aiccsid.'&aicc_url='.$CFG->wwwroot.'/mod/scorm/aicc.php'.$scoparams;
+  } else {
+      if (isset($sco->parameters) && (!empty($sco->parameters))) {
+          $launcher = $sco->launch.$connector.$sco->parameters;
+      } else {
+          $launcher = $sco->launch;
+      }
+  }
 }
 
 if (scorm_external_link($sco->launch)) {
@@ -180,12 +185,22 @@ if ($sco->scormtype == 'asset') {
 // We expect a SCO: select which API are we looking for.
 $lmsapi = (scorm_version_check($scorm->version, SCORM_12) || empty($scorm->version)) ? 'API' : 'API_1484_11';
 
+$noAPI = '0';
+if (scorm_version_check($scorm->version, SCORM_TCAPI)) {
+    $noAPI = '1';
+    $tcapi_params = scorm_get_tincan_launch_params($scorm,$sco,$result);
+    $result .= $tcapi_params;
+}
+
 echo html_writer::start_tag('html');
 echo html_writer::start_tag('head');
 echo html_writer::tag('title', 'LoadSCO');
 ?>
     <script type="text/javascript">
     //<![CDATA[
+
+    var noAPI = <?php echo $noAPI; ?>;
+
     var myApiHandle = null;
     var myFindAPITries = 0;
 
@@ -222,7 +237,7 @@ echo html_writer::tag('title', 'LoadSCO');
     }
 
    function doredirect() {
-        if (myGetAPIHandle() != null) {
+        if(noAPI === 1 || myGetAPIHandle() != null)) {
             location = "<?php echo $result ?>";
         }
         else {
