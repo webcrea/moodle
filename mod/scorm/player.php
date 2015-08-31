@@ -272,10 +272,12 @@ if (!empty($forcejs)) {
     echo $OUTPUT->box(get_string("forcejavascriptmessage", "scorm"), "generalbox boxaligncenter forcejavascriptmessage");
 }
 
-if (file_exists($CFG->dirroot.'/mod/scorm/datamodels/'.$scorm->version.'.php')) {
-    include_once($CFG->dirroot.'/mod/scorm/datamodels/'.$scorm->version.'.php');
-} else {
-    include_once($CFG->dirroot.'/mod/scorm/datamodels/scorm_12.php');
+if (!scorm_version_check($scorm->version, SCORM_TCAPI)) {
+  if (file_exists($CFG->dirroot.'/mod/scorm/datamodels/'.$scorm->version.'.php')) {
+      include_once($CFG->dirroot.'/mod/scorm/datamodels/'.$scorm->version.'.php');
+  } else {
+      include_once($CFG->dirroot.'/mod/scorm/datamodels/scorm_12.php');
+  }
 }
 
 // Add the checknet system to keep checking for a connection.
