@@ -289,7 +289,7 @@ function scorm_parse($scorm, $full) {
             if (!scorm_parse_scorm($scorm, $manifest)) {
                 $scorm->version = 'ERROR';
             }
-        } else if ($manifest = $fs->get_file($context->id, 'mod_scorm', 'content', 0, '/', 'tincan.xml') {
+        } else if ($manifest = $fs->get_file($context->id, 'mod_scorm', 'content', 0, '/', 'tincan.xml')) {
             require_once("$CFG->dirroot/mod/scorm/datamodels/tincanlib.php");
 
             if (!scorm_parse_tincan($scorm, $manifest)) {
@@ -306,7 +306,7 @@ function scorm_parse($scorm, $full) {
             }
         }
 
-    } else if ($scorm->scormtype === SCORM_TYPE_EXTERNAL and $cfgscorm->allowtypeexternal) {        
+    } else if ($scorm->scormtype === SCORM_TYPE_EXTERNAL and $cfgscorm->allowtypeexternal) {
         if (preg_match('/(http:\/\/|https:\/\/|www).*\/imsmanifest.xml$/i', $scorm->reference)) {
           // SCORM
           require_once("$CFG->dirroot/mod/scorm/datamodels/scormlib.php");
