@@ -237,7 +237,7 @@ echo html_writer::tag('title', 'LoadSCO');
     }
 
    function doredirect() {
-        if(noAPI === 1 || myGetAPIHandle() != null)) {
+        if(noAPI === 1 || myGetAPIHandle() != null) {
             location = "<?php echo $result ?>";
         }
         else {
